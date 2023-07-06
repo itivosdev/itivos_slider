@@ -1,0 +1,40 @@
+#itivos_slider_radio_date_content {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#itivos_slider_radio_date_content label, #itivos_slider_radio_date_content input {
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+#itivos_slider_date_content{
+    display: none;
+}
+.slider_thumbs {
+	border: 1px solid #ddd;
+    border-radius: 3px;
+    height: auto;
+    line-height: 1.42857;
+    max-width: 100%;
+    padding: 4px;
+}
+.slider_move {
+	cursor: move;
+	color: #555;
+}
+.border_sldiers {
+	background-color: #fff;
+    border: 1px solid #d3d8db;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+.content_app_module #sortable_slider {
+    border: none;
+}
+.buttons-slider-action a {
+    padding: 10px;
+    margin-left: 10px;
+}
+.buttons-slider-action {
+    padding-top: 50px;
+}
