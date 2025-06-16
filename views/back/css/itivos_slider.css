@@ -16,10 +16,13 @@
     line-height: 1.42857;
     max-width: 100%;
     padding: 4px;
+    max-width: 250px;
 }
 .slider_move {
 	cursor: move;
 	color: #555;
+    display: inline-block;
+    vertical-align: middle;
 }
 .border_sldiers {
 	background-color: #fff;
@@ -36,5 +39,11 @@
     margin-left: 10px;
 }
 .buttons-slider-action {
-    padding-top: 50px;
+    display: block;
+    padding-top: 20px;
+    padding-left: 20px;
+}
+.slider_content_itivos {
+    vertical-align: middle;
+    display: inline-block;
 }

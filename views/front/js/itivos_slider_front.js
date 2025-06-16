@@ -1,3 +1,4 @@
+/*
 var speed = $("#slider_speed").val();
 $('.itivos_carousel_slick').slick({
   slidesToShow: 1,
@@ -6,3 +7,4 @@ $('.itivos_carousel_slick').slick({
   autoplay: true,
   autoplaySpeed: speed,
 });
+*/

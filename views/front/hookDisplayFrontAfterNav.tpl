@@ -15,7 +15,7 @@
 									{/if}
 									{if isset($slider.call_to_action)}
 										{if !empty($slider.call_to_action)}
-											<a href="{$slider.call_to_action}" class="boton boton-primario">Ver más</a>
+											<a href="{$slider.call_to_action}" class="button button-primary">Ver más</a>
 										{/if}
 									{/if}
 								</div>

@@ -60,7 +60,8 @@ class itivos_slider_pages extends Model
 					  AND slider.status != 'deleted'
 					GROUP BY slider.id, slider_lang.language_link, slider_lang.background,
 					         slider_lang.title, slider_lang.description, slider_lang.call_to_action,
-					         slider_lang.new_windows, slider_lang.text_position";
+					         slider_lang.new_windows, slider_lang.text_position
+					ORDER by slider.position asc ";
 		return connect::execute($query, "select");
 	}
 	public static function reOrderSlider($params)

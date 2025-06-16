@@ -1,4 +1,29 @@
 <?php
+/**
+ * Copyright since 2021 Itivos SA and Contributors
+ * Itivos is an International Registered Trademark & Property of Itivos SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/OSL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@Itivos.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Itivos B2BSoft to newer
+ * versions in the future. If you wish to customize Itivos for your
+ * needs please refer to https://devdocs.itivos.com/ for more information.
+ *
+ * @author    Itivos SA and Contributors <contact@itivos.com>
+ * @copyright Since 2021 Itivos SA and Contributors
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ */
+
 require_once($_SERVER['DOCUMENT_ROOT']."/modules/itivos_slider/classes/itivos_slider_pages.php");
 require_once($_SERVER['DOCUMENT_ROOT']."/modules/itivos_slider/classes/itivos_slider_pages_lang.php");
 class ItivosSlider extends Modules
@@ -10,7 +35,7 @@ class ItivosSlider extends Modules
 		$this->displayName = $this->l('Slider');
         $this->description = $this->l('Carrusel de imagenes responsivo.');
 		$this->category  ='front_office_features';
-		$this->version ='1.0.1';
+		$this->version ='1.0.2';
 		$this->author ='Bernardo Fuentes';
 		$this->versions_compliancy = array('min'=>'1.0', 'max'=> __SYSTEM_VERSION__);
         $this->confirmUninstall = $this->l('Are you sure about removing these details?');
@@ -28,6 +53,7 @@ class ItivosSlider extends Modules
            !$this->registerHook("displayBottom") ||
 		   !$this->registerHook("displayHead") ||
            !$this->defaultData() ||
+           !$this->installTab("ItivosSlider", "Sliders", "ItivosSlider", null, "sliders", "aspect_ratio") ||
            !$this->installDb()
 		   ) {
 			return false;
@@ -95,120 +121,33 @@ class ItivosSlider extends Modules
     	$config_data = array();
         $current_link = $_SERVER["REQUEST_URI"];
         $params = explode("/", $current_link);
-        //$sliders = ItivosSliderClass::getSlidersByLang("es");
-    	if (isset($_POST['action'])) {
-            if ($_POST['action'] == "ajax") {
-                switch ($_POST['resource']) {
-                    case 'update_order':
-                        Itivos_slider_pages::reOrderSlider($_POST['order']);
-                        break;
-                    case 'del':
-                        Itivos_slider_pages::delSlider($_POST['id']);
-                        $response = array('error' =>  false,
-                                          'message' => "Slider borrado con exito.");
-                        response($response);
-                        die();
-                        break;
-                    default:
-                        die();
-                        break;
-                }
-            }
-    	}else {
-            if (isset($_POST['submit_action'])) {
-                if ($_POST['submit_action'] != "saveConfig") {
-                    self::postSave($_POST);
-                    if ($_POST['submit_action'] == "updateAction") {
-                        $this->html .= $this->displayConfirmation($this->l("Slider actualizado correctamente"));
-                    }else {
-                        $this->html .= $this->displayConfirmation($this->l("Slider agregado correctamente"));
-                    }
-                }
-                if ($_POST['submit_action'] == "saveConfig") {
-                    self::updateConfig();
-                }
-            }
-            $this->view->assign("module_name", $this->displayName);
-            $this->view->assign("now", date("Y-m-d H:i:s"));
-            if (isIsset('btnAdd')) {
-                $helper = new HelperForm();
-                $helper->tpl_vars = array(
-                    'fields_values' => array(),
-                    'languages' => language::getLangs(),
-                    'back_link' => array("label" => "Volver al listado", 
-                                         "link" => "modules/config/".$this->name.""),
-                );
-                $helper->submit_action = "addAction";
-                return $this->html .= $helper->renderForm(self::generateForm());
-            }
-            if (!isIsset("id_slider")) {
-                $helper = new HelperForm();
-                $helper->tpl_vars = array(
-                    'fields_values' => self::getdataConfig(),
-                    'languages' => language::getLangs(),
-                );
-                $helper->submit_action = "saveConfig";
-                $this->html .= $helper->renderForm(self::generateFormConfig());
-                $this->view->assign("sliders", Itivos_slider_pages::getSlidersByLang());
-            	$this->view->display($this->template_dir."list.tpl");
-            }else {
-                $slider_data = array();
-                foreach ($this->languages as $key => $lang) {
-                    $slider_data['langs'][$lang['id']] = itivos_slider_pages::getSlider(getValue('id_slider'), $lang['id']);
-                }
-                $helper = new HelperForm();
-                $helper->tpl_vars = array(
-                    'fields_values' => $slider_data,
-                    'languages' => language::getLangs(),
-                    'back_link' => array("label" => "Volver al listado", 
-                                         "link" => "modules/config/".$this->name.""),
-                );
-                $helper->submit_action = "updateAction";
-                return $this->html .= $helper->renderForm(self::generateForm());
-            }
+    	
+        if (isset($_POST['submit_action'])) {
+            self::updateConfig();
+            $_SESSION['type_message'] = "success";
+            $_SESSION['message'] = $this->l("Configuracion actualizada correctamente");
+            header("Location: ".$current_link."");
         }
-    }
-    public function postSave($params)
-    {
-        $slider_obj = New itivos_slider_pages();
-        $langs = array();
-        foreach ($this->languages as $key => $language) {
-            $lang = $language['id'];
-            $langs[$lang]['language_link'] = $lang;
-            if (isset($params['title_'.$lang])) {
-                $langs[$lang]['title'] = $params['title_'.$lang];
-            }
-            if (isset($params['description_'.$lang])) {
-                $langs[$lang]['description'] = $params['description_'.$lang];
-            }
-            if (isset($params['call_to_action_'.$lang])) {
-                $langs[$lang]['call_to_action'] = $params['call_to_action_'.$lang];
-            }
-            if (isset($params['new_windows'])) {
-                $langs[$lang]['new_windows'] = $params['new_windows'];
-            }
-            if (isset($params['text_position_'.$lang])) {
-                $langs[$lang]['text_position'] = $params['text_position_'.$lang];
-            }
-
-            $uri = array();
-            if (isset($_FILES["background_".$lang]["name"])) {
-                if ( !empty($_FILES["background_".$lang]["tmp_name"]) )  {
-                    $upload = uploadFile($_FILES["background_".$lang]);
-                    if ($upload['errors']==0) {
-                        array_push($uri, $upload['url']);
-                    }
-                }
-            }
-            if (!empty($uri)) {
-                $langs[$lang]['background'] = $uri[0];
-            }
+        $this->view->assign("module_name", $this->displayName);
+        $this->view->assign("now", date("Y-m-d H:i:s"));
+        if (isIsset('btnAdd')) {
+            $helper = new HelperForm();
+            $helper->tpl_vars = array(
+                'fields_values' => array(),
+                'languages' => language::getLangs(),
+                'back_link' => array("label" => "Volver al listado", 
+                                     "link" => "modules/config/".$this->name.""),
+            );
+            $helper->submit_action = "addAction";
+            return $this->html .= $helper->renderForm(self::generateForm());
         }
-        if (isIsset('id_slider')) {
-            $slider_obj->id = getValue('id_slider');
-        }
-        $slider_obj->langs = $langs;
-        $slider_obj->save();
+        $helper = new HelperForm();
+        $helper->tpl_vars = array(
+            'fields_values' => self::getdataConfig(),
+            'languages' => language::getLangs(),
+        );
+        $helper->submit_action = "saveConfig";
+        $this->html .= $helper->renderForm(self::generateFormConfig());
     }
     public function getdataConfig()
     {
@@ -272,81 +211,6 @@ class ItivosSlider extends Modules
                 ),
             );
         return $form;
-    }
-    public function generateForm()
-    {
-        if (isIsset('id_slider')) {
-            $title = $this->l('Actualizar carousel');
-        }else {
-            $title = $this->l('Agregar nuevo carousel');
-        }
-        $form = array(
-                'form' => array(
-                    'legend' => array(
-                    'title' => $title,
-                    'icon' => 'icon-cogs',
-                    ),
-                    'inputs' => array(
-                        array(
-                            'type' => 'file',
-                            'label' => $this->l('IMAGEN'),
-                            'name' => 'background',
-                            'lang' => true,
-                            'required' => true,
-                            'desc' => $this->l("Archivo JPG, PNG Peso max:".$this->upload_max_size),
-                        ),
-                        array(
-                            'type' => 'text',
-                            'label' => $this->l('ENCABEZADO'),
-                            'name' => 'title',
-                            'lang' => true,
-                            'required' => true,
-                            'desc' => $this->l("Titulo par el slider"),
-                        ),
-                        array(
-                            'type' => 'text',
-                            'label' => $this->l('DESCRIPCIÓN'),
-                            'name' => 'description',
-                            'lang' => true,
-                            'required' => true,
-                        ),
-                        array(
-                            'type' => 'text',
-                            'label' => $this->l('ENLACE'),
-                            'name' => 'call_to_action',
-                            'lang' => true,
-                            'required' => true,
-                            'desc' => $this->l("Destino del boton (Call to action)"),
-                        ),
-                        array(
-                            'label' => $this->l('ABRE EN NUEVA VENTANA'),
-                            'type' => 'switch',
-                            'name' => 'new_windows',
-                            'desc' => $this->l('Al dar clic en el call to action se abrirá en una nueva ventana'),
-                            'values' => array(
-                                array(
-                                    'id' => 'active_off',
-                                    'value' => "no",
-                                    'label' => $this->l('no')
-                                ),
-                                array(
-                                    'id' => 'active_on',
-                                    'value' => "yes",
-                                    'label' => $this->l('si')
-                                )
-                            ),
-                        ),
-                    ),
-                    'submit' => array(
-                        'title' => $this->l('Save'),
-                    ),
-                ),
-            );
-        if (isIsset("id_slider")) {
-            unset($form['form']['inputs'][0]['required']);
-        }
-        return $form;
-
     }
     public function hookDisplayFrontAfterNav($params = null)
     {
